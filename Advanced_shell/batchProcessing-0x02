@@ -1,6 +1,6 @@
 #!/bin/bash
 
-list=("Bulbasaur" "Ivysaur" "Venusaur" "Charmander" "Charmeleon")
+list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 url="https://pokeapi.co/api/v2/pokemon/"
 
 echo "Error Log - $(date)" > "error.log"
