@@ -5,13 +5,13 @@ JSON_FILE="data.json"
 
 # Extract values using jq
 names=$(jq -r '.name' "$JSON_FILE")
-heights=$(jq '.height' "$JSON_FILE")
-weights=$(jq '.weight' "$JSON_FILE")
+height=$(jq '.height' "$JSON_FILE")
+weight=$(jq '.weight' "$JSON_FILE")
 types=$(jq -r '.types[0].type.name' "$JSON_FILE")
 
 # Convert height from decimeters to meters and weight from hectograms to kilograms
-height=$(awk "BEGIN {printf \"%.1f\", $heights / 10}")
-weight=$(awk "BEGIN {printf \"%.f\", $weights / 10}")
+formatted_height=$(awk "BEGIN {printf \"%.1f\", $height / 10}")
+formatted_weight=$(awk "BEGIN {printf \"%.f\", $weight / 10}")
 
 # Capitalize the first letter of the type using sed
 type=$(echo "$types" | sed 's/.*/\u&/')
@@ -19,4 +19,4 @@ name=$(echo "${names^}")
 
 
 # Format the output
-echo "$name is of type $type, weighs ${weight}kg, and is ${height}m tall."
+echo "$name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall."
