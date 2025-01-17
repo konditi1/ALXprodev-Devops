@@ -1,0 +1,29 @@
+#!/bin/bash
+
+echo "name,type,weight,height" > output.csv
+for file in *.json; do
+    if [[ -e "$file" ]]; then
+        # Input JSON file
+        JSON_FILE="$file"
+
+        # Extract values using jq
+        names=$(jq -r '.name' "$JSON_FILE")
+        height=$(jq '.height' "$JSON_FILE")
+        weight=$(jq '.weight' "$JSON_FILE")
+        types=$(jq -r '.types[0].type.name' "$JSON_FILE")
+
+        # Capitalize the first letter of the type using sed
+        type=$(echo "$types" | sed 's/.*/\u&/')
+        name=$(echo "${names^}")
+
+
+        # Format the output
+        echo "$name,$type,${weight},${height}"
+        
+        # Append the output to the CSV file
+        echo "$name,$type,${weight},${height}" >> output.csv
+    fi
+done
+
+# calculate average height and weight
+awk -F ',' '{total_height+=$4; total_weight+=$3} END {print "Average height:", total_height/NR-1, "Average weight:", total_weight/NR-1}' output.csv
