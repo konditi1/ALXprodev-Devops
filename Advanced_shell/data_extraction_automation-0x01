@@ -11,10 +11,12 @@ type=$(jq -r '.types[0].type.name' "$JSON_FILE")
 
 # Convert height from decimeters to meters and weight from hectograms to kilograms
 height_m=$(awk "BEGIN {printf \"%.1f\", $height / 10}")
-weight_kg=$(awk "BEGIN {printf \"%.1f\", $weight / 10}")
+weight_kg=$(awk "BEGIN {printf \"%.f\", $weight / 10}")
 
 # Capitalize the first letter of the type using sed
 type_capitalized=$(echo "$type" | sed 's/.*/\u&/')
+name_capitalized=$(echo "${name^}")
+
 
 # Format the output
-echo "$name is of type $type_capitalized, weighs ${weight_kg}kg, and is ${height_m}m tall."
+echo "$name_capitalized is of type $type_capitalized, weighs ${weight_kg}kg, and is ${height_m}m tall."
