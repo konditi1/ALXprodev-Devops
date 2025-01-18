@@ -37,6 +37,19 @@ fetch_pokemon_data() {
     fi
 }
 
+# Trap to handle script interruption (e.g., Ctrl+C)
+cleanup() {
+    echo "Interrupt received. Cleaning up background jobs..."
+    # List all background jobs
+    jobs -p | while read -r job; do
+        echo "Terminating job $job..."
+        kill "$job" 2>/dev/null
+    done
+    echo "Cleanup complete."
+    exit 1
+}
+trap cleanup SIGINT SIGTERM
+
 # Loop through Pokémon and fetch data in parallel
 for mixed_case_pokemon in "${pokemon[@]}"; do
     pokemon_name=${mixed_case_pokemon,,}
@@ -44,6 +57,7 @@ for mixed_case_pokemon in "${pokemon[@]}"; do
 done
 
 # Wait for all background processes to complete
+echo "Waiting for all background processes to finish..."
 wait
 
 # Clean up temporary .txt files
