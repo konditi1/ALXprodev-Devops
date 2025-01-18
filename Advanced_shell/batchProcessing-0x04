@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Pokémon list and base API URL
+pokemon=("bulbasaur" "ivysaur" "vnusaur" "charmander" "charmeleon")
+url="https://pokeapi.co/api/v2/pokemon/"
+
+# Initialize error log
+echo "Error Log - $(date)" > "error.log"
+
+# Function to fetch Pokémon data
+fetch_pokemon_data() {
+    local pokemon_name=$1
+    local attempt=0
+    local max_attempts=3
+    local success=0
+
+    while [ $attempt -lt $max_attempts ]; do
+        attempt=$((attempt + 1))
+        echo "Attempt $attempt: Fetching data for $pokemon_name..."
+
+        # Make the API call and capture HTTP status code
+        http_code=$(curl -X GET "$url$pokemon_name" -s -o "${pokemon_name}.json" -w "%{http_code}")
+
+        if [ "$http_code" -eq 200 ]; then
+            echo "API request successful. Data saved to ${pokemon_name}.json."
+            success=1
+            break
+        else
+            echo "Attempt $attempt for $pokemon_name failed with status code $http_code." >> "error.log"
+            sleep 3
+        fi
+    done
+
+    # Log error if all attempts fail
+    if [ $success -ne 1 ]; then
+        echo "$(date): API request to ${url}${pokemon_name} failed after $max_attempts attempts." >> "error.log"
+    fi
+}
+
+# Loop through Pokémon and fetch data in parallel
+for mixed_case_pokemon in "${pokemon[@]}"; do
+    pokemon_name=${mixed_case_pokemon,,}
+    fetch_pokemon_data "$pokemon_name" &
+done
+
+# Wait for all background processes to complete
+wait
+
+# Clean up temporary .txt files
+if ls *.txt 1> /dev/null 2>&1; then
+    rm *.txt
+else
+    echo "No .txt files found to remove."
+fi
+
+echo "Data retrieval completed."
