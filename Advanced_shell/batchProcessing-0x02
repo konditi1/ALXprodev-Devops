@@ -3,24 +3,31 @@
 list=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
 url="https://pokeapi.co/api/v2/pokemon/"
 
+# Initialize the error log
 echo "Error Log - $(date)" > "error.log"
 
+# Loop through the list of Pokémon
 for mixed_case_pokemon in "${list[@]}"; do
     pokemon=${mixed_case_pokemon,,}
-    curl -X GET "$url$pokemon" -s -o "$pokemon.json" -w "%{http_code}" > "$pokemon".txt
-    http_code=$(cat "$pokemon".txt)
 
-    if [ "$http_code" -eq 200 ]; then
-        echo "API request successful. Data saved to $pokemon.json"
-    else
-        echo " $(date): API request to $url$pokemon failed with status code $http_code" >> "error.log"
-    fi
+    # Attempt up to 3 times to fetch data
+    for attempt in {1..3}; do
+        
+        # Make the API call and capture HTTP status code
+        http_code=$(curl -X GET "$url$pokemon" -s -o "$pokemon.json" -w "%{http_code}")
 
-    sleep 5
+        if [ "$http_code" -eq 200 ]; then
+            echo "API request successful. Data saved to $pokemon.json."
+            sleep 3
+            break
+        fi
+
+        # If it's the final attempt, log the failure
+        if [ "$attempt" -eq 3 ]; then
+            echo "$(date): API request to $url$pokemon failed with status code $http_code." >> "error.log"
+        fi
+
+        # Pause between retries
+        sleep 3
+    done
 done
-
-if ls *.txt 1> /dev/null 2>&1; then
-    rm *.txt
-else
-    echo "No .txt files found to remove."
-fi
